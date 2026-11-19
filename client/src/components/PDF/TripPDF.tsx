@@ -8,8 +8,8 @@ import type { Trip, Day, Place, Category, AssignmentsMap, DayNote, DistanceUnit,
 import { isDayInAccommodationRange, getDayOrder } from '../../utils/dayOrder'
 import { hidesOnMiddleDay, getTransportForDay, getMergedItems, getSpanPhase, getDisplayTimeForDay } from '../../utils/dayMerge'
 import { safeHexColor } from '../../utils/safeColor'
-import { pdfSwitchOn } from '../../utils/pdfSwitch'
-import { openPdfPreview, PAGE_BREAK_KEY, TRANSPORT_NOTES_KEY } from './pdfPreview'
+import { pdfOptInSwitchOn, pdfSwitchOn } from '../../utils/pdfSwitch'
+import { DARK_KEY, openPdfPreview, PAGE_BREAK_KEY, TRANSPORT_NOTES_KEY } from './pdfPreview'
 import { renderIconMarkup } from '../../utils/iconMarkup'
 import { formatMoney, formatMoneySum, formatClockTime, splitReservationDateTime, type MoneyEntry } from '../../utils/formatters'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -192,6 +192,7 @@ export async function downloadTripPDF({ trip, days, places, assignments: allStor
   const assignments = planAssignments(stored, showServiceStops)
   const breaksPerDay = pdfSwitchOn(PAGE_BREAK_KEY)
   const showTransportNotes = pdfSwitchOn(TRANSPORT_NOTES_KEY)
+  const dark = pdfOptInSwitchOn(DARK_KEY)
   // Set while the days render: the switch only shows when there is a note to hide.
   let hasTransportNotes = false
   const loc = _locale || undefined
@@ -605,7 +606,7 @@ export async function downloadTripPDF({ trip, days, places, assignments: allStor
     </div>`
 
   const html = `<!DOCTYPE html>
-<html lang="${(loc || 'en').split('-')[0]}">
+<html lang="${(loc || 'en').split('-')[0]}"${dark ? ' class="pdf-dark"' : ''}>
 <head>
 <meta charset="UTF-8">
 <base href="${window.location.origin}/">
@@ -809,6 +810,38 @@ export async function downloadTripPDF({ trip, days, places, assignments: allStor
   .plugin-section-table th { font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; padding: 4px 8px; border-bottom: 1px solid #e2e8f0; }
   .plugin-section-table td { font-size: 9px; color: #334155; padding: 4px 8px; border-bottom: 1px solid #f1f5f9; }
 
+  /* ── Dark mode ─────────────────────────────────── */
+  /* The preview switch puts .pdf-dark on <html>: it paints the whole page (the @page
+     margin is 0 here) and needs no rebuild of the document. */
+  html.pdf-dark, html.pdf-dark body { background: #0b1020; color: #e2e8f0; color-scheme: dark; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pdf-dark .pdf-footer span { color: #94a3b8; }
+  .pdf-dark .pdf-footer img { filter: brightness(0) invert(1); }
+  .pdf-dark .trip-map-title, .pdf-dark .trip-map-leg-dist, .pdf-dark .trip-map-credit { color: #94a3b8; }
+  .pdf-dark .trip-map-total, .pdf-dark .trip-map-leg { color: #cbd5e1; }
+  /* The route map is drawn on light land and sea: invert, then turn the hue back to keep the route colours. */
+  .pdf-dark .trip-map-svg { border-color: #25304a; filter: invert(0.92) hue-rotate(180deg); }
+  .pdf-dark .day-header-bar { background: #172036; }
+  .pdf-dark .day-accommodation { border-color: #25304a; }
+  .pdf-dark .accommodation-icon { filter: invert(1) hue-rotate(180deg); }
+  .pdf-dark .place-card { background: #111a2e; border-color: #25304a; }
+  .pdf-dark .place-num { background: #334155; }
+  .pdf-dark .place-name { color: #f1f5f9; }
+  .pdf-dark .info-text { color: #94a3b8; }
+  .pdf-dark .info-text.muted { color: #64748b; }
+  .pdf-dark .md th, .pdf-dark .md td { border-color: #25304a; }
+  .pdf-dark .md blockquote { border-inline-start-color: #25304a; }
+  .pdf-dark .chip { background: #1e293b; color: #cbd5e1; }
+  .pdf-dark .chip-green { background: #0d2b22; color: #34d399; }
+  .pdf-dark .chip-amber { background: #33260a; color: #fbbf24; }
+  .pdf-dark .note-card { background: #0f1730; border-color: #25304a; }
+  .pdf-dark .note-text { color: #cbd5e1; }
+  .pdf-dark .note-time { color: #94a3b8; }
+  .pdf-dark .empty-day { color: #64748b; }
+  .pdf-dark .plugin-section-title { color: #e2e8f0; border-bottom-color: #25304a; }
+  .pdf-dark .plugin-section-text, .pdf-dark .plugin-section-table td { color: #cbd5e1; }
+  .pdf-dark .plugin-section-table th { color: #94a3b8; border-bottom-color: #25304a; }
+  .pdf-dark .plugin-section-table td { border-bottom-color: #1e293b; }
+
   /* ── Print ─────────────────────────────────────── */
   @media print {
     body { margin: 0; }
@@ -875,7 +908,7 @@ ${pluginSectionsHtml}
   markdown.dispose()
   if (signal?.aborted) return
 
-  openPdfPreview({ html, title: trip?.title || tr('pdf.travelPlan'), tripId: trip?.id, tr, breaksPerDay, showTransportNotes, hasTransportNotes })
+  openPdfPreview({ html, title: trip?.title || tr('pdf.travelPlan'), tripId: trip?.id, tr, breaksPerDay, showTransportNotes, dark, hasTransportNotes })
 }
 
 function bodyClassAttr(breaksPerDay: boolean, showTransportNotes: boolean): string {

@@ -12,6 +12,15 @@ export function pdfSwitchOn(key: string): boolean {
   }
 }
 
+/** A preview switch that is off unless it was turned on (dark mode). */
+export function pdfOptInSwitchOn(key: string): boolean {
+  try {
+    return localStorage.getItem(key) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function rememberPdfSwitch(key: string, on: boolean): void {
   try {
     localStorage.setItem(key, on ? '1' : '0');

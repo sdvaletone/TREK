@@ -18,6 +18,9 @@ export const PAGE_BREAK_KEY = 'trek_pdf_page_break_per_day';
  */
 export const TRANSPORT_NOTES_KEY = 'trek_pdf_transport_notes';
 
+/** Dark pages; off unless turned on. */
+export const DARK_KEY = 'trek_pdf_dark';
+
 /* The overlay is imperative DOM, so the switch from Settings/ToggleSwitch is
    rebuilt here rather than rendered — as static markup it would carry no
    behaviour. Same geometry and the same tokens, so it reads as the same control. */
@@ -42,6 +45,7 @@ export interface PdfPreviewOptions {
   tr: Translate;
   breaksPerDay: boolean;
   showTransportNotes: boolean;
+  dark: boolean;
   /** The transport-notes switch only shows when there is a note to hide. */
   hasTransportNotes: boolean;
 }
@@ -74,6 +78,7 @@ export function openPdfPreview({
   tr,
   breaksPerDay,
   showTransportNotes,
+  dark,
   hasTransportNotes,
 }: PdfPreviewOptions): void {
   // Open in modal with srcdoc iframe (no URL loading = no X-Frame-Options issue)
@@ -97,6 +102,7 @@ export function openPdfPreview({
     <span style="font-size:13px;font-weight:600;color:var(--text-primary);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(title)}</span>
     <div style="display:flex;align-items:center;gap:8px">
       ${hasTransportNotes ? previewSwitch('pdf-transport-notes-toggle', tr('pdf.transportNotes'), showTransportNotes) : ''}
+      ${previewSwitch('pdf-dark-toggle', tr('pdf.darkMode'), dark)}
       ${previewSwitch('pdf-daybreak-toggle', tr('pdf.pageBreakPerDay'), breaksPerDay)}
       ${save.html}
       <button type="button" id="pdf-close-btn" style="background:none;border:none;cursor:pointer;color:var(--text-faint);display:flex;padding:4px;border-radius:6px">
@@ -138,6 +144,10 @@ export function openPdfPreview({
   wirePreviewSwitch(header, 'pdf-daybreak-toggle', (on) => {
     rememberPdfSwitch(PAGE_BREAK_KEY, on);
     iframe.contentDocument?.body.classList.toggle('pdf-flow', !on);
+  });
+  wirePreviewSwitch(header, 'pdf-dark-toggle', (on) => {
+    rememberPdfSwitch(DARK_KEY, on);
+    iframe.contentDocument?.documentElement.classList.toggle('pdf-dark', on);
   });
   wirePreviewSwitch(header, 'pdf-transport-notes-toggle', (on) => {
     rememberPdfSwitch(TRANSPORT_NOTES_KEY, on);
