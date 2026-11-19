@@ -11,6 +11,7 @@ const pdf: TranslationStrings = {
     "iOS ne peut pas imprimer depuis l'app de l'écran d'accueil. Safari ouvre ce voyage avec l'export prêt, et vous pourrez y enregistrer le PDF.",
   'pdf.pageBreakPerDay': 'Saut de page par jour',
   'pdf.transportNotes': 'Notes de transport',
+  'pdf.darkMode': 'Mode sombre',
   'pdf.mapTitle': "Aperçu de l'itinéraire",
   'pdf.distanceLabel': 'Distance', // same-as-en
   'pdf.mapCredit': 'Contours des pays : geoBoundaries (CC BY 4.0)',

@@ -11,6 +11,7 @@ const pdf: TranslationStrings = {
     'Az iOS nem tud nyomtatni a kezdőképernyőn lévő appból. A Safari megnyitja ezt az utat az előkészített exporttal, ott mentheted a PDF-et.',
   'pdf.pageBreakPerDay': 'Oldaltörés naponta',
   'pdf.transportNotes': 'Közlekedési jegyzetek',
+  'pdf.darkMode': 'Dark mode', // en-fallback
   'pdf.mapTitle': 'Útvonal áttekintése',
   'pdf.distanceLabel': 'Távolság',
   'pdf.mapCredit': 'Országhatárok: geoBoundaries (CC BY 4.0)',
